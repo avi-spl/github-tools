@@ -50,6 +50,8 @@ namespace GithubTools.Hooks
 					return "Joey";
 				case "GCOX":
 					return "George";
+				case "DJENNIFER77":
+					return "Jennifer";
 				default:
 					return "Ryan";
 			}
