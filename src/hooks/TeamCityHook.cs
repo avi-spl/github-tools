@@ -17,7 +17,8 @@ namespace GithubTools.Hooks
 				PushData pushData = JsonConvert.DeserializeObject<PushData>(Request.Form["payload"]);
 
 				var buildTypeId = getBuildTypeId(pushData.Repository.Name, pushData.Branch);
-				var teamCityUser = translateUser(pushData.Commits.OrderBy(c => c.Timestamp).First().Author.Username);
+				var user = pushData.Pusher ?? pushData.Commits.OrderBy(c => c.Timestamp).First().Author;
+				var teamCityUser = translateUser(user);
 				sendGetRequest(buildTypeId, teamCityUser);
 				return string.Empty;
 			};
@@ -42,15 +43,19 @@ namespace GithubTools.Hooks
 			return buildTypeId;
 		}
 
-		private static string translateUser(string gitUsername)
+		private static string translateUser(UserData user)
 		{
-			switch (gitUsername.ToUpper())
+			if (user == null || string.IsNullOrEmpty(user.Email))
+				return "Ryan";
+
+			switch (user.Email.ToLower())
 			{
-				case "JOEYSHIPLEY":
+				case "joe.shipley@avispl.com":
 					return "Joey";
-				case "GCOX":
+				case "gcox18.gmail.com":
+				case "george.cox@avispl.com":
 					return "George";
-				case "DJENNIFER77":
+				case "jennifer.reitsky@avispl.com":
 					return "Jennifer";
 				default:
 					return "Ryan";

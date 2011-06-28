@@ -78,6 +78,7 @@ namespace GithubTools.Hooks
 		public string Branch { get; set; }
 		public RepoData Repository { get; set; }
 		public List<CommitData> Commits { get; set; }
+		public UserData Pusher { get; set; }
 	}
 
 	public class RepoData
