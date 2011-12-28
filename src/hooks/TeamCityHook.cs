@@ -52,7 +52,7 @@ namespace GithubTools.Hooks
 			{
 				case "joe.shipley@avispl.com":
 					return "Joey";
-				case "gcox18.gmail.com":
+				case "gcox18@gmail.com":
 				case "george.cox@avispl.com":
 					return "George";
 				case "jennifer.reitsky@avispl.com":
