@@ -23,7 +23,7 @@ namespace GithubTools.Hooks
 					var buildTypeId = getBuildTypeId(pushData.Repository.Name, pushData.Branch);
 					var user = pushData.Pusher ?? pushData.Commits.OrderBy(c => c.Timestamp).First().Author;
 					var teamCityUser = translateUser(user);
-					sendGetRequest(buildTypeId, teamCityUser);
+					sendGetRequest(buildTypeId, teamCityUser, Request.Form["payload"]);
 				}
 				catch (Exception ex)
 				{
@@ -71,9 +71,13 @@ namespace GithubTools.Hooks
 			}
 		}
 
-		static void sendGetRequest(string buildTypeId, string teamCityUser)
+		static void sendGetRequest(string buildTypeId, string teamCityUser, string payload)
 		{
-			if (string.IsNullOrEmpty(buildTypeId)) return;
+			if (string.IsNullOrEmpty(buildTypeId))
+			{
+				ExceptionReporter.Report(new Exception(string.Format("Build Id not found. Github payload: {0}", payload)));
+				return;
+			}
 
 			var url = string.Format(ConfigurationManager.AppSettings["TeamCityBuildTriggerUrl"], buildTypeId);
 			var credentials = new NetworkCredential(teamCityUser, teamCityUser.ToLower());
