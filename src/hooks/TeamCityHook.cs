@@ -1,8 +1,10 @@
+using System;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
+using AVISPL.Exceptions;
 using Nancy;
 using Newtonsoft.Json;
 
@@ -14,12 +16,19 @@ namespace GithubTools.Hooks
 		{
 			Post["/teamcity"] = x =>
 			{
-				PushData pushData = JsonConvert.DeserializeObject<PushData>(Request.Form["payload"]);
+				try
+				{
+					PushData pushData = JsonConvert.DeserializeObject<PushData>(Request.Form["payload"]);
 
-				var buildTypeId = getBuildTypeId(pushData.Repository.Name, pushData.Branch);
-				var user = pushData.Pusher ?? pushData.Commits.OrderBy(c => c.Timestamp).First().Author;
-				var teamCityUser = translateUser(user);
-				sendGetRequest(buildTypeId, teamCityUser);
+					var buildTypeId = getBuildTypeId(pushData.Repository.Name, pushData.Branch);
+					var user = pushData.Pusher ?? pushData.Commits.OrderBy(c => c.Timestamp).First().Author;
+					var teamCityUser = translateUser(user);
+					sendGetRequest(buildTypeId, teamCityUser);
+				}
+				catch (Exception ex)
+				{
+					ExceptionReporter.Report(ex);
+				}
 				return string.Empty;
 			};
 		}
