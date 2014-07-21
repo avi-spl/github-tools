@@ -1,7 +1,5 @@
 using System;
 using System.Configuration;
-using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
 using AVISPL.Exceptions;
@@ -20,7 +18,7 @@ namespace GithubTools.Hooks
 				{
 					PushData pushData = JsonConvert.DeserializeObject<PushData>(Request.Form["payload"]);
 
-					var buildTypeId = getBuildTypeId(pushData.Repository.Name, pushData.Branch);
+					var buildTypeId = string.Format("{0}_{1}", pushData.Repository.Name.ToLower(), pushData.Branch.ToLower()).Replace("-", "");
 					var user = pushData.Pusher ?? pushData.Commits.OrderBy(c => c.Timestamp).First().Author;
 					var teamCityUser = translateUser(user);
 					sendGetRequest(buildTypeId, teamCityUser, Request.Form["payload"]);
@@ -33,25 +31,6 @@ namespace GithubTools.Hooks
 			};
 		}
 
-		private static string getBuildTypeId(string repo, string branch)
-		{
-			string buildTypeId;
-			const string cmdText = "SELECT BUILD_TYPE_ID FROM vcs_root_instance as vcs INNER JOIN agent_sources_version as asv ON asv.VCS_ROOT_ID = vcs.ID WHERE vcs.BODY LIKE @filter";
-			var connectionString = ConfigurationManager.AppSettings["TeamCityDbConnectionString"];
-			using (var sqlConnection = new SqlConnection(connectionString))
-			{
-				sqlConnection.Open();
-				using (var dbCommand = new SqlCommand(cmdText, sqlConnection))
-				{
-					dbCommand.CommandType = CommandType.Text;
-					dbCommand.Parameters.Add(new SqlParameter("@filter", string.Format(@"%branch={0}%url=%{1}%", branch, repo)));
-					buildTypeId = dbCommand.ExecuteScalar() as string;
-				}
-				sqlConnection.Close();
-			}
-			return buildTypeId;
-		}
-
 		private static string translateUser(UserData user)
 		{
 			if (user == null || string.IsNullOrEmpty(user.Email))
@@ -59,13 +38,14 @@ namespace GithubTools.Hooks
 
 			switch (user.Email.ToLower())
 			{
-				case "joe.shipley@avispl.com":
-					return "Joey";
 				case "gcox18@gmail.com":
+				case "george@tundaware.com":
 				case "george.cox@avispl.com":
 					return "George";
-				case "jennifer.reitsky@avispl.com":
-					return "Jennifer";
+				case "andrew.brewton@avispl.com":
+					return "abrewton";
+				case "michael.taylor@avispl.com":
+					return "mtaylor";
 				default:
 					return "Ryan";
 			}
