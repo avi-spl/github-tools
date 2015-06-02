@@ -38,6 +38,7 @@ namespace GithubTools.Hooks
 
 			switch (user.Email.ToLower())
 			{
+				//Applications Development Developers
 				case "gcox18@gmail.com":
 				case "george@tundaware.com":
 				case "george.cox@avispl.com":
@@ -46,6 +47,12 @@ namespace GithubTools.Hooks
 					return "mtaylor";
 				case "ken.pomella@avispl.com":
 					return "kpomella";
+				//Internet Marketing Developers
+				case "ken.cabrera@avispl.com":
+					return "kcabrera";
+				case "shawn.dreier@avispl.com":
+					return "sdreier";
+				// Gotta have a default
 				default:
 					return "Ryan";
 			}
