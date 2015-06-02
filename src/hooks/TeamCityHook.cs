@@ -42,10 +42,10 @@ namespace GithubTools.Hooks
 				case "george@tundaware.com":
 				case "george.cox@avispl.com":
 					return "George";
-				case "andrew.brewton@avispl.com":
-					return "abrewton";
 				case "michael.taylor@avispl.com":
 					return "mtaylor";
+				case "ken.pomella@avispl.com":
+					return "kpomella";
 				default:
 					return "Ryan";
 			}
