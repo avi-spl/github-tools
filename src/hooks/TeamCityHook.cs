@@ -45,6 +45,8 @@ namespace GithubTools.Hooks
 					return "George";
 				case "michael.taylor@avispl.com":
 					return "mtaylor";
+				case "kevin.rood@avispl.com":
+					return "krood";
 				//Internet Marketing Developers
 				case "ken.cabrera@avispl.com":
 					return "kcabrera";
