@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 14.00
+# Visual Studio 2015
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hooks", "hooks\hooks.csproj", "{39CEA24A-2C8D-4869-BE75-ED5FBE18C719}"
 EndProject
 Global
