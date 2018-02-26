@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Net;
+using System.Text;
 using AVISPL.Exceptions;
 using Nancy;
 using Newtonsoft.Json;
@@ -119,8 +120,25 @@ namespace GithubTools.Hooks
 			}
 			var credentials = new NetworkCredential(teamCityUserName, teamCityUserName.ToLower());
 
-			var wc = new WebClient { Credentials = credentials };
-			wc.DownloadString(url);
+			var payload = "<build";
+			if (!string.IsNullOrEmpty(branchName))
+				payload += " branchName=\"" + branchName + "\"";
+			payload += ">";
+			payload += "<buildType id=\"" + buildTypeId + "\"/>";
+			payload += "</build>";
+			var payloadRaw = Encoding.UTF8.GetBytes(payload);
+
+			var request = WebRequest.Create(url);
+			request.ContentType = "application/xml";
+			request.ContentLength = payloadRaw.Length;
+			request.Method = "POST";
+			request.Credentials = credentials;
+
+			var stream = request.GetRequestStream();
+			stream.Write(payloadRaw, 0, payloadRaw.Length);
+			stream.Close();
+
+			request.GetResponse();
 		}
 	}
 }
