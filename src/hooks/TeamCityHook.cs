@@ -103,7 +103,8 @@ namespace GithubTools.Hooks
 				["gcox"] = "George",
 				["kevinrood"] = "krood",
 				["mondavired"] = "mtaylor",
-				["ixtlan07"] = "rlane"
+				["ixtlan07"] = "rlane",
+				["jlederman"] = "jlederman"
 			};
 
 			var defaultTeamCityUserName = "Ryan";
