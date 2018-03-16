@@ -115,10 +115,6 @@ namespace GithubTools.Hooks
 		static void triggerTeamCityBuild(string teamCityUserName, string buildTypeId, string branchName = null)
 		{
 			var url = string.Format(ConfigurationManager.AppSettings["TeamCityBuildTriggerUrl"], buildTypeId);
-			if (!string.IsNullOrEmpty(branchName))
-			{
-				url += string.Format("&branchName={0}", branchName);
-			}
 			var credentials = new NetworkCredential(teamCityUserName, teamCityUserName.ToLower());
 
 			var payload = "<build";
