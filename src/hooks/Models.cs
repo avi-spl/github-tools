@@ -10,6 +10,7 @@
 
 	public class PullRequestData
 	{
+		public bool? Draft { get; set; }
 		public BaseData Base { get; set; }
 	}
 

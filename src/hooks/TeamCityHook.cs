@@ -86,6 +86,14 @@ namespace GithubTools.Hooks
 			if (data.Action == "opened" || data.Action == "synchronize") // new PR, or commits were pushed to existing PR
 			{
 				var pullRequest = data.PullRequest;
+
+				// is this a draft PR? (assume it is not if we couldn't parse the "Draft" property)
+				if (pullRequest.Draft ?? false)
+				{
+					// yep; no trigger for you!
+					return;
+				}
+
 				var branchName = data.Number.ToString();
 				var buildTypeId = string.Format("{0}_{1}", pullRequest.Base.Repo.Name.ToLower(), pullRequest.Base.Ref.ToLower()).Replace("-", "");
 
