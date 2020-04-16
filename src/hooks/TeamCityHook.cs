@@ -83,7 +83,7 @@ namespace GithubTools.Hooks
 
 		private static void HandlePullRequestEvent(PullRequestResponseData data)
 		{
-			if (data.Action == "opened" || data.Action == "synchronize") // new PR, or commits were pushed to existing PR
+			if (data.Action == "opened" || data.Action == "synchronize" || data.Action == "ready_for_review") // new PR, or commits were pushed to existing PR, or PR switching from Draft to "ready"
 			{
 				var pullRequest = data.PullRequest;
 
