@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using Newtonsoft.Json.Serialization;
 
-namespace GithubTools.Hooks
+namespace GitHubTools.Hooks
 {
 	public class SnakeCaseResolver : DefaultContractResolver
 	{
@@ -15,7 +15,7 @@ namespace GithubTools.Hooks
 		protected override string ResolvePropertyName(string propertyName)
 		{
 			var firstLetterLowerCase = char.ToLower(propertyName[0]) + propertyName.Substring(1); // "PropertyName" -> "propertyName"
-			return Regex.Replace(firstLetterLowerCase, @"([A-Z])", "_$1").ToLower(); // "propertyName" -> "property_name"
+			return Regex.Replace(firstLetterLowerCase, "([A-Z])", "_$1").ToLower(); // "propertyName" -> "property_name"
 		}
 	}
 }

@@ -1,4 +1,4 @@
-﻿namespace GithubTools.Hooks.Models
+﻿namespace GitHubTools.Hooks.Models
 {
 	public class PullRequestResponseData
 	{
@@ -46,5 +46,10 @@
 	{
 		public string Name { get; set; }
 		public string Url { get; set; }
+	}
+
+	public class TeamCityConfigData
+	{
+		public string BuildTriggerUrl { get; set; }
 	}
 }

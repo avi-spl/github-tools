@@ -1,65 +1,64 @@
+﻿using GitHubTools.Hooks.Models;
+
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+
+using Newtonsoft.Json;
+
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Text;
-using AVISPL.Exceptions;
-using Nancy;
-using Newtonsoft.Json;
 
-using GithubTools.Hooks.Models;
-
-namespace GithubTools.Hooks
+namespace GitHubTools.Hooks.Controllers
 {
-	public class TeamCityHook : NancyModule
+	[Route("teamcity")]
+	[ApiController]
+	public class TeamCityController : ControllerBase
 	{
+		private readonly JsonSerializerSettings _snakeCaseJsonSerializerSettings = new JsonSerializerSettings() { ContractResolver = new SnakeCaseResolver() };
+		private readonly IOptions<TeamCityConfigData> _teamCityConfigData;
+
+		public TeamCityController(IOptions<TeamCityConfigData> teamCityConfigData)
+		{
+			_teamCityConfigData = teamCityConfigData;
+		}
+
+		[HttpPost]
+		public ActionResult<string> Post()
+		{
+			EventType eventType = DetermineEventType(Request.Headers);
+
+			switch (eventType)
+			{
+				case EventType.Push:
+					HandlePushEvent(JsonConvert.DeserializeObject<PushData>(Request.Form["payload"]));
+					break;
+				case EventType.PullRequest:
+					HandlePullRequestEvent(JsonConvert.DeserializeObject<PullRequestResponseData>(Request.Form["payload"], _snakeCaseJsonSerializerSettings));
+					break;
+			}
+
+			return Ok();
+		}
+
 		private enum EventType
 		{
 			Unknown,
 			Push,
 			PullRequest
 		}
-		private readonly JsonSerializerSettings _snakeCaseJsonSerializerSettings =
-			new JsonSerializerSettings()
-			{
-				ContractResolver = new SnakeCaseResolver()
-			};
 
-		public TeamCityHook()
-		{
-			Post["/teamcity"] = x =>
-			{
-				try
-				{
-					EventType eventType = DetermineEventType(Request);
-					
-					switch(eventType)
-					{
-						case EventType.Push:
-							HandlePushEvent(JsonConvert.DeserializeObject<PushData>(Request.Form["payload"]));
-							break;
-						case EventType.PullRequest:
-							HandlePullRequestEvent(JsonConvert.DeserializeObject<PullRequestResponseData>(Request.Form["payload"], _snakeCaseJsonSerializerSettings));
-							break;
-					}
-				}
-				catch (Exception ex)
-				{
-					ExceptionReporter.Report(ex);
-				}
-				return string.Empty;
-			};
-		}
-
-		private static EventType DetermineEventType(Request request)
+		private static EventType DetermineEventType(IHeaderDictionary headers)
 		{
 			var result = EventType.Unknown;
 
-			if (request.Headers.ContainsKey("X-GitHub-Event"))
+			if (headers.ContainsKey("X-GitHub-Event"))
 			{
-				var eventHeader = request.Headers["X-GitHub-Event"].First().ToUpper();
-				switch(eventHeader)
+				var eventHeader = headers["X-GitHub-Event"].First().ToUpper();
+				switch (eventHeader)
 				{
 					case "PUSH":
 						result = EventType.Push;
@@ -73,15 +72,15 @@ namespace GithubTools.Hooks
 			return result;
 		}
 
-		private static void HandlePushEvent(PushData data)
+		private void HandlePushEvent(PushData data)
 		{
 			var buildTypeId = string.Format("{0}_{1}", data.Repository.Name.ToLower(), data.Branch.ToLower()).Replace("-", "");
 			var githubLogin = data.Sender.Login;
-			var teamCityUserName = lookupTeamCityUserName(githubLogin);
-			triggerTeamCityBuild(teamCityUserName, buildTypeId);
+			var teamCityUserName = LookupTeamCityUserName(githubLogin);
+			TriggerTeamCityBuild(teamCityUserName, buildTypeId);
 		}
 
-		private static void HandlePullRequestEvent(PullRequestResponseData data)
+		private void HandlePullRequestEvent(PullRequestResponseData data)
 		{
 			if (data.Action == "opened" || data.Action == "synchronize" || data.Action == "ready_for_review") // new PR, or commits were pushed to existing PR, or PR switching from Draft to "ready"
 			{
@@ -98,13 +97,13 @@ namespace GithubTools.Hooks
 				var buildTypeId = string.Format("{0}_{1}", pullRequest.Base.Repo.Name.ToLower(), pullRequest.Base.Ref.ToLower()).Replace("-", "");
 
 				var githubLogin = data.Sender.Login;
-				var teamCityUserName = lookupTeamCityUserName(githubLogin);
+				var teamCityUserName = LookupTeamCityUserName(githubLogin);
 
-				triggerTeamCityBuild(teamCityUserName, buildTypeId, branchName);
+				TriggerTeamCityBuild(teamCityUserName, buildTypeId, branchName);
 			}
 		}
 
-		private static string lookupTeamCityUserName(string githubLogin)
+		private string LookupTeamCityUserName(string githubLogin)
 		{
 			var githubToTeamCity = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
 			{
@@ -115,14 +114,14 @@ namespace GithubTools.Hooks
 				["jlederman"] = "jlederman"
 			};
 
-			var defaultTeamCityUserName = "Ryan";
+			const string defaultTeamCityUserName = "Ryan";
 
 			return githubToTeamCity.ContainsKey(githubLogin) ? githubToTeamCity[githubLogin] : defaultTeamCityUserName;
 		}
 
-		static void triggerTeamCityBuild(string teamCityUserName, string buildTypeId, string branchName = null)
+		private void TriggerTeamCityBuild(string teamCityUserName, string buildTypeId, string branchName = null)
 		{
-			var url = string.Format(ConfigurationManager.AppSettings["TeamCityBuildTriggerUrl"], buildTypeId);
+			var url = string.Format(_teamCityConfigData.Value.BuildTriggerUrl, buildTypeId);
 			var credentials = new NetworkCredential(teamCityUserName, teamCityUserName.ToLower());
 
 			var payload = "<build";
