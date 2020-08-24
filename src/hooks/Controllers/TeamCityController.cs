@@ -111,7 +111,8 @@ namespace GitHubTools.Hooks.Controllers
 				["kevinrood"] = "krood",
 				["mondavired"] = "mtaylor",
 				["ixtlan07"] = "rlane",
-				["jlederman"] = "jlederman"
+				["jlederman"] = "jlederman",
+				["aaron-fields"] = "afields"
 			};
 
 			const string defaultTeamCityUserName = "Ryan";
